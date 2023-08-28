@@ -10,7 +10,7 @@ private import semmle.python.Concepts
 private import semmle.python.frameworks.data.ModelsAsData
 private import semmle.python.dataflow.new.RemoteFlowSources
 private import semmle.python.dataflow.new.BarrierGuards
-
+private import semmle.python.ApiGraphs
 /**
  * Provides default sources, sinks and sanitizers for detecting
  * "reflected server-side cross-site scripting"
@@ -85,4 +85,10 @@ module ReflectedXss {
    * A comparison with a constant string, considered as a sanitizer-guard.
    */
   class StringConstCompareAsSanitizerGuard extends Sanitizer, StringConstCompareBarrier { }
+
+  // class FlaskJsonify extends Sanitizer {
+  //   FlaskJsonify() {
+  //     this = [API::moduleImport("flask"), API::moduleImport("flask").getMember("Flask")].getMember("jsonify").getParameter(0).asSink()
+  //   }
+  // }
 }
