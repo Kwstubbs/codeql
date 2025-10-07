@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -79,5 +80,78 @@ func mongo2(w http.ResponseWriter, r *http.Request) {
 	coll.UpdateMany(ctx, filter, update)
 	coll.UpdateOne(ctx, filter, update)
 	coll.Watch(ctx, pipeline)
+
+}
+
+func security_test(w http.ResponseWriter, r *http.Request) {
+
+	// Set client options
+	clientOptions := options.Client().ApplyURI("mongodb://test:test@localhost:27017")
+
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
+
+	// Get a handle for your collection
+	db := client.Database("test")
+	coll := db.Collection("collection")
+	untrustedInput := r.Referer()
+
+	filter := bson.D{{"name", untrustedInput}}
+
+	fieldName := "test"
+	document := filter
+	documents := []interface{}{
+		document,
+		bson.D{{"name", "Bob"}},
+	}
+	matchStage := bson.D{{"$match", filter}}
+	pipeline := mongo.Pipeline{matchStage}
+	ctx := context.TODO()
+	replacement := bson.D{{"location", "NYC"}}
+	update := bson.D{{"$inc", bson.D{{"age", 1}}}}
+	// models := nil
+	//Aggregation operation
+	coll.Aggregate(ctx, pipeline, nil)
+	// coll.BulkWrite(ctx, models, nil)
+	coll.BulkWrite(ctx, nil, nil)
+	coll.Clone(nil)
+	coll.CountDocuments(ctx, filter, nil)
+
+	coll.Distinct(ctx, fieldName, filter)
+	coll.EstimatedDocumentCount(ctx, nil)
+
+	// CRUD operations
+	find_filter_safe := bson.D{{"$match", untrustedInput}}
+	find_filter_unsafe := bson.D{{untrustedInput, "unsafe"}}
+	var requestBody map[string]interface{}
+	//Not strongly typed - could be anything
+	json.NewDecoder(r.Body).Decode(&requestBody)
+	find_filter_object_unsafe := bson.D{{"$match", requestBody}}
+
+	coll.Find(ctx, find_filter_safe, nil)
+	coll.FindOne(ctx, find_filter_unsafe, nil)
+	coll.FindOneAndDelete(ctx, find_filter_object_unsafe, nil)
+	coll.FindOneAndReplace(ctx, find_filter_unsafe, nil)
+	coll.FindOneAndUpdate(ctx, find_filter_unsafe, nil)
+	coll.ReplaceOne(ctx, filter, replacement)
+	coll.UpdateMany(ctx, filter, update)
+	coll.UpdateOne(ctx, filter, update)
+	coll.Watch(ctx, pipeline)
+	coll.DeleteMany(ctx, filter, nil)
+	coll.DeleteOne(ctx, filter, nil)
+
+	coll.InsertMany(ctx, documents)
+	coll.InsertOne(ctx, document, nil)
 
 }
