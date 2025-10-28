@@ -48,3 +48,26 @@ module SqlInjection {
     }
   }
 }
+
+class BsonDType extends Type {
+  BsonDType() {
+    this.hasQualifiedName("go.mongodb.org/mongo-driver/bson/primitive", "D")
+  }
+}
+
+class BsonDLiteral extends CompositeLit {
+  BsonDLiteral() {
+    this.getType() instanceof BsonDType
+  }
+}
+
+class BsonDKeyInsecure extends Expr {
+  BsonDKeyInsecure() {
+    exists(BsonDLiteral bsonD, CompositeLit kvPair |
+      kvPair = bsonD.getAnElement() and
+      (
+      (this = kvPair.getElement(1) and not kvPair.getElement(1).getType() instanceof CompositeType)
+      )
+    )
+  }
+}
