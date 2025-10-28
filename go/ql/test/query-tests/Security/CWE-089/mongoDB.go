@@ -93,18 +93,18 @@ func security_test(w http.ResponseWriter, r *http.Request) {
 
 	// CRUD operations
 	// unsafe if unsafe filter and safe is safe filter, likewise for update
-	coll.FindOneAndDelete(ctx, find_filter_object_unsafe, nil) // $ Alert
-	coll.FindOneAndReplace(ctx, find_filter_unsafe, nil)
-	coll.FindOneAndUpdate(ctx, find_filter_unsafe, nil)
-	coll.ReplaceOne(ctx, find_filter_unsafe, replacement)
-	coll.UpdateMany(ctx, find_filter_unsafe, safe_update)
-	coll.UpdateOne(ctx, find_filter_unsafe, find_update_object_unsafe)
-	coll.DeleteMany(ctx, find_filter_safe, nil) // $ Alert
-	coll.DeleteOne(ctx, find_filter_unsafe, nil)
-	coll.DeleteMany(ctx, find_filter_safe, nil) // $ Alert
-	coll.Watch(ctx, pipeline)                   // $ Alert
+	coll.FindOneAndDelete(ctx, find_filter_object_unsafe, nil)         // $ Alert
+	coll.FindOneAndReplace(ctx, find_filter_unsafe, nil)               // $ MISSING: Alert
+	coll.FindOneAndUpdate(ctx, find_filter_unsafe, nil)                // $ MISSING: Alert
+	coll.ReplaceOne(ctx, find_filter_unsafe, replacement)              // $ MISSING: Alert
+	coll.UpdateMany(ctx, find_filter_unsafe, safe_update)              // $ MISSING: Alert
+	coll.UpdateOne(ctx, find_filter_unsafe, find_update_object_unsafe) // $ MISSING: Alert
+	coll.DeleteMany(ctx, find_filter_safe, nil)                        // $ SPURIOUS: Alert
+	coll.DeleteOne(ctx, find_filter_unsafe, nil)                       // $ MISSING: Alert
+	coll.DeleteMany(ctx, find_filter_safe, nil)                        // $ SPURIOUS: Alert
+	coll.Watch(ctx, pipeline)                                          // $ SPURIOUS: Alert
 	//unsafe is filter is unsafe and return value is used
-	count, _ := coll.CountDocuments(ctx, find_filter_unsafe, nil)
+	count, _ := coll.CountDocuments(ctx, find_filter_unsafe, nil)       // $ MISSING: Alert
 	distinctNamesInLondon, err := coll.Distinct(ctx, fieldName, filter) // $ Alert
 	coll.FindOne(ctx, find_filter_unsafe, nil).Decode(&result)
 	cursor, err := coll.Find(ctx, find_filter_unsafe, nil)

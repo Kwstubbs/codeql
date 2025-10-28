@@ -47,6 +47,20 @@ module SqlInjection {
       this.getType() instanceof NumericType or this.getType() instanceof BoolType
     }
   }
+  /**
+   * A simple BSON.D value sanitizer.
+   * 
+  class BsonDKeyInsecure extends Sanitizer {
+    BsonDKeyInsecure() {
+      exists(BsonDLiteral bsonD, CompositeLit kvPair |
+        kvPair = bsonD.getAnElement() and
+        (
+        (this.asExpr() = kvPair.getElement(1) and not kvPair.getElement(1).getType() instanceof CompositeType)
+        )
+      )
+    }
+  }
+  */
 }
 
 class BsonDType extends Type {
@@ -58,16 +72,5 @@ class BsonDType extends Type {
 class BsonDLiteral extends CompositeLit {
   BsonDLiteral() {
     this.getType() instanceof BsonDType
-  }
-}
-
-class BsonDKeyInsecure extends Expr {
-  BsonDKeyInsecure() {
-    exists(BsonDLiteral bsonD, CompositeLit kvPair |
-      kvPair = bsonD.getAnElement() and
-      (
-      (this = kvPair.getElement(1) and not kvPair.getElement(1).getType() instanceof CompositeType)
-      )
-    )
   }
 }
